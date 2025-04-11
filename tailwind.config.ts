@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,15 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// WoW-themed colors
+				wow: {
+					'dark-blue': '#0c1c2c',
+					'blue': '#1a2f4a',
+					'gold': '#ffbb00',
+					'brown': '#63421b',
+					'frame': '#704214',
+					'background': '#0d2337',
 				}
 			},
 			borderRadius: {
@@ -84,11 +94,23 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'glow': {
+					'0%, 100%': { 
+						textShadow: '0 0 8px rgba(255, 187, 0, 0.7)' 
+					},
+					'50%': { 
+						textShadow: '0 0 16px rgba(255, 187, 0, 1)' 
+					},
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'glow': 'glow 3s ease-in-out infinite'
+			},
+			fontFamily: {
+				'wow': ['"LifeCraft"', 'serif']
 			}
 		}
 	},
