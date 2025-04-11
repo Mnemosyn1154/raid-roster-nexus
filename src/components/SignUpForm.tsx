@@ -1,8 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Role, WoWClass, Specialization, ClassSpec } from '../types';
+import { specIcons } from '@/data/specIcons';
+import { 
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 interface SignUpFormProps {
-  onSignUp: (characterName: string, role: Role, wowClass: WoWClass, spec: Specialization) => void;
+  onSignUp: (characterName: string, role: Role, wowClass: WoWClass, spec: Specialization, itemLevel: number) => void;
 }
 
 const SignUpForm: React.FC<SignUpFormProps> = ({ onSignUp }) => {
@@ -10,6 +20,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSignUp }) => {
   const [selectedClass, setSelectedClass] = useState<WoWClass>('전사');
   const [selectedSpec, setSelectedSpec] = useState<Specialization>('무기');
   const [role, setRole] = useState<Role>('딜러');
+  const [itemLevel, setItemLevel] = useState<number>(0);
 
   // 직업별 가능한 특성 목록
   const specs = {
@@ -52,13 +63,30 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSignUp }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (characterName.trim()) {
-      onSignUp(characterName, role, selectedClass, selectedSpec);
+    if (characterName.trim() && itemLevel > 0) {
+      onSignUp(characterName, role, selectedClass, selectedSpec, itemLevel);
       setCharacterName('');
       setSelectedClass('전사');
       setSelectedSpec('무기');
       setRole('딜러');
+      setItemLevel(0);
     }
+  };
+
+  const classColors: { [key: string]: string } = {
+    '죽음의 기사': 'text-[#C41F3B]',  // 붉은색
+    '악마사냥꾼': 'text-[#A330C9]',   // 보라색
+    '드루이드': 'text-[#FF7D0A]',     // 주황색
+    '기원사': 'text-[#33937F]',       // 청록색
+    '사냥꾼': 'text-[#ABD473]',       // 연두색
+    '마법사': 'text-[#69CCF0]',       // 하늘색
+    '수도사': 'text-[#00FF96]',       // 연녹색
+    '성기사': 'text-[#F58CBA]',       // 분홍색
+    '사제': 'text-[#FFFFFF]',         // 흰색
+    '도적': 'text-[#FFF569]',         // 노란색
+    '주술사': 'text-[#0070DE]',       // 파란색
+    '흑마법사': 'text-[#9482C9]',     // 보라색
+    '전사': 'text-[#C79C6E]'          // 갈색
   };
 
   return (
@@ -75,40 +103,87 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSignUp }) => {
             required
           />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-white/80 mb-1 text-sm">직업</label>
-            <select
-              value={selectedClass}
-              onChange={(e) => setSelectedClass(e.target.value as WoWClass)}
-              className="w-full rounded border border-white/20 bg-slate-800/50 px-3 py-2 text-white focus:border-white/40 focus:outline-none"
-            >
-              {Object.keys(specs).map((wowClass) => (
-                <option key={wowClass} value={wowClass}>
-                  {wowClass}
-                </option>
-              ))}
-            </select>
+            <Select value={selectedClass} onValueChange={(value: WoWClass) => setSelectedClass(value)}>
+              <SelectTrigger className="w-full bg-slate-800/50 border-white/20 text-white">
+                <SelectValue placeholder="직업 선택" />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-800 border-white/20">
+                <SelectGroup>
+                  {Object.keys(specs).map((wowClass) => (
+                    <SelectItem 
+                      key={wowClass} 
+                      value={wowClass}
+                      className={cn(
+                        "text-white focus:bg-slate-700 focus:text-white",
+                        classColors[wowClass]
+                      )}
+                    >
+                      {wowClass}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <label className="block text-white/80 mb-1 text-sm">전문화</label>
-            <select
-              value={selectedSpec}
-              onChange={(e) => setSelectedSpec(e.target.value as Specialization)}
-              className="w-full rounded border border-white/20 bg-slate-800/50 px-3 py-2 text-white focus:border-white/40 focus:outline-none"
-            >
-              {specs[selectedClass].map((spec) => (
-                <option key={spec} value={spec}>
-                  {spec}
-                </option>
-              ))}
-            </select>
+            <Select value={selectedSpec} onValueChange={(value: Specialization) => setSelectedSpec(value)}>
+              <SelectTrigger className="w-full bg-slate-800/50 border-white/20 text-white">
+                {specIcons[selectedClass]?.[selectedSpec] && (
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={specIcons[selectedClass][selectedSpec].path}
+                      alt={`${selectedSpec} 전문화 아이콘`}
+                      className="w-5 h-5 object-contain"
+                    />
+                    <span>{selectedSpec}</span>
+                  </div>
+                )}
+              </SelectTrigger>
+              <SelectContent className="bg-slate-800 border-white/20">
+                <SelectGroup>
+                  {specs[selectedClass].map((spec) => (
+                    <SelectItem 
+                      key={spec} 
+                      value={spec}
+                      className="text-white focus:bg-slate-700 focus:text-white"
+                    >
+                      <div className="flex items-center gap-2">
+                        {specIcons[selectedClass]?.[spec] && (
+                          <img
+                            src={specIcons[selectedClass][spec].path}
+                            alt={`${spec} 전문화 아이콘`}
+                            className="w-5 h-5 object-contain"
+                          />
+                        )}
+                        {spec}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="block text-white/80 mb-1 text-sm">아이템 레벨</label>
+            <input
+              type="number"
+              value={itemLevel || ''}
+              onChange={(e) => setItemLevel(Math.max(0, parseInt(e.target.value) || 0))}
+              min="0"
+              className="w-full rounded border border-white/20 bg-slate-800/50 px-3 py-2 text-white placeholder:text-white/50 focus:border-white/40 focus:outline-none"
+              placeholder="447"
+              required
+            />
           </div>
         </div>
         <div>
           <button 
             type="submit" 
-            className="w-full rounded border border-white/20 bg-slate-800/50 py-3 text-white transition-colors hover:bg-slate-700/50 focus:outline-none focus:ring-2 focus:ring-white/20"
+            className="w-full rounded bg-purple-600 py-3 text-white transition-colors hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
           >
             참가 신청 ({role})
           </button>

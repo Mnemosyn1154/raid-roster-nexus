@@ -1,7 +1,8 @@
 import React from 'react';
-import { Participant, Role } from '../types';
-import { specIcons } from '../data/specIcons';
+import { RaidPlan, Role, Participant } from '@/types';
+import { specIcons } from '@/data/specIcons';
 import { cn } from '@/lib/utils';
+import { useAdmin } from '@/contexts/AdminContext';
 
 interface ParticipantListProps {
   participants: Participant[];
@@ -27,9 +28,29 @@ const classColors: { [key: string]: string } = {
 const roleOrder: Role[] = ['탱커', '힐러', '딜러'];
 
 const ParticipantList: React.FC<ParticipantListProps> = ({ participants, onRemoveParticipant }) => {
-  // 역할별로 참가자 그룹화
+  const { isAdmin } = useAdmin();
+
+  // 역할별로 참가자 그룹화 및 정렬
   const groupedParticipants = roleOrder.reduce((acc, role) => {
-    acc[role] = participants.filter(p => p.role === role);
+    const roleParticipants = participants.filter(p => p.role === role);
+    
+    // 직업과 특성으로 그룹화
+    const groupedByClassAndSpec = roleParticipants.reduce((group, participant) => {
+      const key = `${participant.class}-${participant.spec}`;
+      if (!group[key]) {
+        group[key] = [];
+      }
+      group[key].push(participant);
+      return group;
+    }, {} as Record<string, Participant[]>);
+
+    // 각 그룹 내에서 아이템 레벨로 정렬
+    Object.values(groupedByClassAndSpec).forEach(group => {
+      group.sort((a, b) => b.itemLevel - a.itemLevel);
+    });
+
+    // 정렬된 참가자 목록 생성
+    acc[role] = Object.values(groupedByClassAndSpec).flat();
     return acc;
   }, {} as Record<Role, Participant[]>);
 
@@ -62,16 +83,18 @@ const ParticipantList: React.FC<ParticipantListProps> = ({ participants, onRemov
               {participant.characterName}
             </span>
             <span className="text-sm text-white/80">
-              {participant.class} - {participant.spec}
+              {participant.class} - {participant.spec} (아이템 레벨: {participant.itemLevel})
             </span>
           </div>
         </div>
-        <button
-          onClick={() => onRemoveParticipant(participant.id)}
-          className="text-red-400 hover:text-red-300 px-2 py-1 transition-colors"
-        >
-          삭제
-        </button>
+        {isAdmin && (
+          <button
+            onClick={() => onRemoveParticipant(participant.id)}
+            className="text-red-400 hover:text-red-300 px-2 py-1 transition-colors"
+          >
+            삭제
+          </button>
+        )}
       </div>
     );
   };

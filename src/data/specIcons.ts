@@ -23,7 +23,7 @@ export const specIcons: SpecIconMapping = {
   },
   '사냥꾼': {
     '야수': { name: 'BeastMastery', path: '/spec-icons/hunter/beastmastery.png' },
-    '사격': { name: 'Marksmanship', path: '/spec-icons/hunter/marksmanship.png' },
+    '사격': { name: 'Marksmanship', path: '/spec-icons/hunter/marksman.png' },
     '생존': { name: 'Survival', path: '/spec-icons/hunter/survival.png' }
   },
   '마법사': {
@@ -48,7 +48,7 @@ export const specIcons: SpecIconMapping = {
   },
   '도적': {
     '암살': { name: 'Assassination', path: '/spec-icons/rogue/assassination.png' },
-    '무법': { name: 'Outlaw', path: '/spec-icons/rogue/outlaw.png' },
+    '무법': { name: 'Outlaw', path: '/spec-icons/rogue/combat.png' },
     '잠행': { name: 'Subtlety', path: '/spec-icons/rogue/subtlety.png' }
   },
   '주술사': {

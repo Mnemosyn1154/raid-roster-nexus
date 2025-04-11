@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { RaidPlan, Participant, Role, WoWClass, Specialization } from '../types';
-import { mockRaidPlan } from '../data/mockData';
-import RaidPlanCreation from '../components/RaidPlanCreation';
-import RaidPlanDisplay from '../components/RaidPlanDisplay';
-import ParticipantList from '../components/ParticipantList';
-import SignUpForm from '../components/SignUpForm';
+import { RaidPlan, Participant, Role, WoWClass, Specialization } from '@/types';
+import { mockRaidPlan } from '@/data/mockData';
+import RaidPlanCreation from '@/components/RaidPlanCreation';
+import RaidPlanDisplay from '@/components/RaidPlanDisplay';
+import ParticipantList from '@/components/ParticipantList';
+import SignUpForm from '@/components/SignUpForm';
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
@@ -17,6 +17,7 @@ const Index = () => {
     time: string,
     dungeonName: string,
     minimumParticipants: number,
+    minimumItemLevel: number,
     raidLeader: string
   ) => {
     const newRaidPlan: RaidPlan = {
@@ -25,6 +26,7 @@ const Index = () => {
       time,
       dungeonName,
       minimumParticipants,
+      minimumItemLevel,
       raidLeader,
       participants: []
     };
@@ -40,7 +42,8 @@ const Index = () => {
     characterName: string,
     role: Role,
     wowClass: WoWClass,
-    spec: Specialization
+    spec: Specialization,
+    itemLevel: number
   ) => {
     if (!raidPlan) return;
     
@@ -53,13 +56,24 @@ const Index = () => {
       });
       return;
     }
+
+    // Check if item level meets the minimum requirement
+    if (itemLevel < raidPlan.minimumItemLevel) {
+      toast({
+        title: "참가 신청 실패",
+        description: `최소 아이템 레벨(${raidPlan.minimumItemLevel})을 충족하지 않습니다.`,
+        variant: "destructive"
+      });
+      return;
+    }
     
     const newParticipant: Participant = {
       id: uuidv4(),
       characterName,
       role,
       class: wowClass,
-      spec
+      spec,
+      itemLevel
     };
     
     setRaidPlan({

@@ -39,6 +39,7 @@ export interface Participant {
   role: Role;
   class: WoWClass;
   spec: Specialization;
+  itemLevel: number;
 }
 
 export interface RaidPlan {
@@ -47,6 +48,7 @@ export interface RaidPlan {
   time: string;
   dungeonName: string;
   minimumParticipants: number;
+  minimumItemLevel: number;
   raidLeader: string;
   participants: Participant[];
 }
