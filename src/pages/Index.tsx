@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { RaidPlan, Participant, Role } from '../types';
+import { RaidPlan, Participant, Role, WoWClass } from '../types';
 import { mockRaidPlan } from '../data/mockData';
 import RaidPlanCreation from '../components/RaidPlanCreation';
 import RaidPlanDisplay from '../components/RaidPlanDisplay';
@@ -37,10 +36,9 @@ const Index = () => {
     });
   };
 
-  const handleSignUp = (characterName: string, role: Role) => {
+  const handleSignUp = (characterName: string, role: Role, wowClass: WoWClass, specialization: string) => {
     if (!raidPlan) return;
     
-    // Check if character name already exists
     if (raidPlan.participants.some(p => p.characterName.toLowerCase() === characterName.toLowerCase())) {
       toast({
         title: "Sign Up Failed",
@@ -53,7 +51,9 @@ const Index = () => {
     const newParticipant: Participant = {
       id: uuidv4(),
       characterName,
-      role
+      role,
+      class: wowClass,
+      specialization
     };
     
     setRaidPlan({
@@ -63,7 +63,7 @@ const Index = () => {
     
     toast({
       title: "Successfully Signed Up",
-      description: `${characterName} has joined as ${role}`,
+      description: `${characterName} has joined as ${wowClass} (${specialization})`,
     });
   };
 
