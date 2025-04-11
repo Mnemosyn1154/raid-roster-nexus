@@ -1,0 +1,123 @@
+import React, { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { RaidPlan, Participant, Role, WoWClass, Specialization } from '../types';
+import { mockRaidPlan } from '../data/mockData';
+import RaidPlanCreation from '../components/RaidPlanCreation';
+import RaidPlanDisplay from '../components/RaidPlanDisplay';
+import ParticipantList from '../components/ParticipantList';
+import SignUpForm from '../components/SignUpForm';
+import { useToast } from "@/hooks/use-toast";
+
+const Index = () => {
+  const [raidPlan, setRaidPlan] = useState<RaidPlan | null>(mockRaidPlan);
+  const { toast } = useToast();
+  
+  const handleCreateRaidPlan = (
+    date: string,
+    time: string,
+    dungeonName: string,
+    minimumParticipants: number,
+    raidLeader: string
+  ) => {
+    const newRaidPlan: RaidPlan = {
+      id: uuidv4(),
+      date,
+      time,
+      dungeonName,
+      minimumParticipants,
+      raidLeader,
+      participants: []
+    };
+    
+    setRaidPlan(newRaidPlan);
+    toast({
+      title: "레이드 일정 생성",
+      description: `${dungeonName} 레이드 일정이 생성되었습니다.`,
+    });
+  };
+
+  const handleSignUp = (
+    characterName: string,
+    role: Role,
+    wowClass: WoWClass,
+    spec: Specialization
+  ) => {
+    if (!raidPlan) return;
+    
+    // Check if character name already exists
+    if (raidPlan.participants.some(p => p.characterName.toLowerCase() === characterName.toLowerCase())) {
+      toast({
+        title: "참가 신청 실패",
+        description: "이미 레이드에 등록된 캐릭터입니다.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const newParticipant: Participant = {
+      id: uuidv4(),
+      characterName,
+      role,
+      class: wowClass,
+      spec
+    };
+    
+    setRaidPlan({
+      ...raidPlan,
+      participants: [...raidPlan.participants, newParticipant]
+    });
+    
+    toast({
+      title: "참가 신청 완료",
+      description: `${characterName}(${spec} ${wowClass})님이 레이드에 참가했습니다.`,
+    });
+  };
+
+  const handleRemoveParticipant = (id: string) => {
+    if (!raidPlan) return;
+    
+    const participant = raidPlan.participants.find(p => p.id === id);
+    if (!participant) return;
+    
+    setRaidPlan({
+      ...raidPlan,
+      participants: raidPlan.participants.filter(p => p.id !== id)
+    });
+    
+    toast({
+      title: "참가자 제외",
+      description: `${participant.characterName}님이 레이드에서 제외되었습니다.`,
+    });
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 to-slate-900 flex flex-col items-center py-8 px-4">
+      <div className="w-full max-w-[720px]">
+        <div className="rounded-lg border border-white/20 bg-slate-900/50 p-6">
+          <h1 className="text-3xl font-semibold text-white mb-6">
+            길드 레이드 현황
+          </h1>
+          
+          {raidPlan ? (
+            <>
+              <RaidPlanDisplay raidPlan={raidPlan} />
+              <ParticipantList 
+                participants={raidPlan.participants} 
+                onRemoveParticipant={handleRemoveParticipant} 
+              />
+              <SignUpForm onSignUp={handleSignUp} />
+            </>
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-white/80 mb-4">생성된 레이드 일정이 없습니다</p>
+            </div>
+          )}
+          
+          <RaidPlanCreation onCreateRaidPlan={handleCreateRaidPlan} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Index;
