@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { RaidPlan, Participant, Role, WoWClass } from '../types';
-import { mockRaidPlan } from '../data/mockData';
-import RaidPlanCreation from '../components/RaidPlanCreation';
-import RaidPlanDisplay from '../components/RaidPlanDisplay';
-import ParticipantList from '../components/ParticipantList';
-import SignUpForm from '../components/SignUpForm';
+import { RaidPlan, Participant, Role, WoWClass, Specialization } from '@/types';
+import { mockRaidPlan } from '@/data/mockData';
+import RaidPlanCreation from '@/components/RaidPlanCreation';
+import RaidPlanDisplay from '@/components/RaidPlanDisplay';
+import ParticipantList from '@/components/ParticipantList';
+import SignUpForm from '@/components/SignUpForm';
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
@@ -17,6 +17,7 @@ const Index = () => {
     time: string,
     dungeonName: string,
     minimumParticipants: number,
+    minimumItemLevel: number,
     raidLeader: string
   ) => {
     const newRaidPlan: RaidPlan = {
@@ -25,24 +26,42 @@ const Index = () => {
       time,
       dungeonName,
       minimumParticipants,
+      minimumItemLevel,
       raidLeader,
       participants: []
     };
     
     setRaidPlan(newRaidPlan);
     toast({
-      title: "Raid Plan Created",
-      description: `New raid plan for ${dungeonName} has been created.`,
+      title: "레이드 일정 생성",
+      description: `${dungeonName} 레이드 일정이 생성되었습니다.`,
     });
   };
 
-  const handleSignUp = (characterName: string, role: Role, wowClass: WoWClass, specialization: string) => {
+  const handleSignUp = (
+    characterName: string,
+    role: Role,
+    wowClass: WoWClass,
+    spec: Specialization,
+    itemLevel: number
+  ) => {
     if (!raidPlan) return;
     
+    // Check if character name already exists
     if (raidPlan.participants.some(p => p.characterName.toLowerCase() === characterName.toLowerCase())) {
       toast({
-        title: "Sign Up Failed",
-        description: "This character is already signed up for the raid.",
+        title: "참가 신청 실패",
+        description: "이미 레이드에 등록된 캐릭터입니다.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Check if item level meets the minimum requirement
+    if (itemLevel < raidPlan.minimumItemLevel) {
+      toast({
+        title: "참가 신청 실패",
+        description: `최소 아이템 레벨(${raidPlan.minimumItemLevel})을 충족하지 않습니다.`,
         variant: "destructive"
       });
       return;
@@ -53,7 +72,8 @@ const Index = () => {
       characterName,
       role,
       class: wowClass,
-      specialization
+      spec,
+      itemLevel
     };
     
     setRaidPlan({
@@ -62,8 +82,8 @@ const Index = () => {
     });
     
     toast({
-      title: "Successfully Signed Up",
-      description: `${characterName} has joined as ${wowClass} (${specialization})`,
+      title: "참가 신청 완료",
+      description: `${characterName}(${spec} ${wowClass})님이 레이드에 참가했습니다.`,
     });
   };
 
@@ -79,17 +99,17 @@ const Index = () => {
     });
     
     toast({
-      title: "Participant Removed",
-      description: `${participant.characterName} has been removed from the raid.`,
+      title: "참가자 제외",
+      description: `${participant.characterName}님이 레이드에서 제외되었습니다.`,
     });
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center py-8 px-4">
-      <div className="w-full max-w-md">
-        <div className="wow-frame">
-          <h1 className="wow-header font-wow tracking-wider text-shadow animate-glow">
-            GUILD RAID STATUS
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 to-slate-900 flex flex-col items-center py-8 px-4">
+      <div className="w-full max-w-[720px]">
+        <div className="rounded-lg border border-white/20 bg-slate-900/50 p-6">
+          <h1 className="text-3xl font-semibold text-white mb-6">
+            길드 레이드 현황
           </h1>
           
           {raidPlan ? (
@@ -103,7 +123,7 @@ const Index = () => {
             </>
           ) : (
             <div className="text-center py-4">
-              <p className="text-wow-gold/80 mb-4">No active raid plans</p>
+              <p className="text-white/80 mb-4">생성된 레이드 일정이 없습니다</p>
             </div>
           )}
           

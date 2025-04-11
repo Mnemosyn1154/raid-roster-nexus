@@ -1,37 +1,36 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 47 65% 65%; /* Gold border color */
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
 
     --radius: 0.5rem;
 
@@ -97,7 +96,7 @@
   }
 
   body {
-    @apply bg-wow-background text-wow-gold font-sans;
+    @apply bg-slate-950 text-gray-100;
     background-image: url('https://bnetcmsus-a.akamaihd.net/cms/template_resource/BDZFKRJT9VOF1650559812839.jpg');
     background-size: cover;
     background-position: center;
@@ -107,41 +106,52 @@
   
   /* WoW-style frame styling */
   .wow-frame {
-    @apply bg-wow-frame border-4 border-wow-brown rounded-md p-4 shadow-lg relative;
+    @apply bg-gradient-to-b from-slate-900 via-slate-800/95 to-slate-800 
+    border-[3px] border-yellow-500/70 rounded-none p-4 shadow-lg;
     box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 0, 0, 0.7);
   }
   
   .wow-header {
-    @apply text-wow-gold font-bold text-center text-2xl md:text-3xl mb-4 animate-glow;
+    @apply text-yellow-500 text-center font-medium mb-4 pb-2 border-b-[3px] border-yellow-500/50;
     text-shadow: 0 0 10px rgba(255, 187, 0, 0.7);
   }
   
   .wow-button {
-    @apply bg-wow-brown text-wow-gold font-bold py-2 px-4 rounded-md border-2 border-wow-gold hover:brightness-125 transition-all duration-200;
+    @apply px-4 py-2 bg-slate-800 border border-yellow-500/70 text-yellow-500 rounded 
+    hover:bg-slate-700 hover:border-yellow-500 transition-colors duration-200;
     box-shadow: inset 0 0 10px rgba(255, 187, 0, 0.3), 0 0 5px rgba(0, 0, 0, 0.5);
   }
   
   /* Table styling */
   .wow-table {
-    @apply w-full border-collapse;
+    @apply w-full border-separate border-spacing-0;
   }
   
   .wow-table th {
-    @apply text-wow-gold font-bold text-left py-2;
+    @apply bg-slate-800 text-yellow-500 px-4 py-2 border-b border-yellow-500/30 text-left;
   }
   
   .wow-table td {
-    @apply py-2 border-t border-wow-brown/50;
+    @apply bg-slate-900 px-4 py-2 border-b border-yellow-500/20;
+  }
+
+  .wow-table tr:last-child td {
+    @apply border-b-0;
+  }
+
+  .wow-table tr:hover td {
+    @apply bg-slate-800 transition-colors duration-200;
   }
 
   /* WoW-styled form inputs */
   .wow-input {
-    @apply bg-wow-blue/80 text-wow-gold border border-wow-gold/50 rounded px-3 py-2 w-full focus:outline-none focus:ring-1 focus:ring-wow-gold/70;
+    @apply w-full px-3 py-2 bg-slate-800 border border-yellow-500/30 rounded text-yellow-500 
+    placeholder:text-yellow-500/50 focus:outline-none focus:border-yellow-500/70;
   }
   
   /* WoW-styled select */
   .wow-select {
-    @apply wow-input appearance-none pr-8;
+    @apply wow-input appearance-none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23ffbb00' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.5rem center;

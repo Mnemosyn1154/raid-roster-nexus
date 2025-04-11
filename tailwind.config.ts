@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -20,6 +19,8 @@ export default {
 		},
 		extend: {
 			colors: {
+				gold: '#FFD700',
+				deepBlue: '#001F3F',
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
@@ -74,8 +75,8 @@ export default {
 				}
 			},
 			borderRadius: {
-				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
+				'md': '8px',
+				'lg': '12px',
 				sm: 'calc(var(--radius) - 4px)'
 			},
 			keyframes: {
@@ -110,9 +111,13 @@ export default {
 				'glow': 'glow 3s ease-in-out infinite'
 			},
 			fontFamily: {
-				'wow': ['"LifeCraft"', 'serif']
+				'wow': ['"LifeCraft"', 'serif'],
+				'fantasy': ['Cinzel', 'serif']
 			}
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [
+		require("tailwindcss-animate"),
+		require("@tailwindcss/typography")
+	],
 } satisfies Config;
