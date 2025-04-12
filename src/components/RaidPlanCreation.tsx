@@ -123,20 +123,20 @@ const RaidPlanCreation: React.FC<RaidPlanCreationProps> = ({
     <div className="mt-4">
       {isAdmin ? (
         !isFormOpen ? (
-          <div className="flex gap-2">
+          <div className="grid grid-cols-2 gap-3">
             <button 
               onClick={() => {
                 setIsEditing(false);
                 setIsFormOpen(true);
               }} 
-              className="flex-1 rounded bg-purple-600 py-3 text-white transition-colors hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+              className="rounded bg-purple-600 py-3 text-white text-lg transition-colors hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
             >
               새 레이드 생성
             </button>
             {currentRaidPlan && (
               <button 
                 onClick={handleEdit}
-                className="rounded bg-blue-600 py-3 px-16 text-white text-lg transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="rounded bg-blue-600 py-3 text-white text-lg transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
                 수정
               </button>
@@ -148,7 +148,7 @@ const RaidPlanCreation: React.FC<RaidPlanCreationProps> = ({
               {isEditing ? '레이드 일정 수정' : '새 레이드 일정 생성'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-white/80 mb-1 text-sm">날짜</label>
                   <Popover>
@@ -206,7 +206,7 @@ const RaidPlanCreation: React.FC<RaidPlanCreationProps> = ({
                   required
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-white/80 mb-1 text-sm">최소 인원</label>
                   <input

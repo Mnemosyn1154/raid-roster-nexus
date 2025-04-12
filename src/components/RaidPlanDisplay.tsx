@@ -9,7 +9,7 @@ const RaidPlanDisplay: React.FC<RaidPlanDisplayProps> = ({ raidPlan }) => {
   return (
     <div className="rounded-lg border border-white/20 bg-slate-900/50 p-4">
       <h2 className="text-xl font-semibold text-white mb-3">레이드 일정</h2>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="p-3 bg-slate-800/50 rounded border border-white/20">
           <p className="text-white/80 mb-2 text-base font-medium text-left">날짜</p>
           <p className="font-semibold text-white text-lg text-left">{raidPlan.date}</p>

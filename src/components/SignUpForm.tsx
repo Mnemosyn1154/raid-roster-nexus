@@ -103,7 +103,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSignUp }) => {
             required
           />
         </div>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-white/80 mb-1 text-sm">직업</label>
             <Select value={selectedClass} onValueChange={(value: WoWClass) => setSelectedClass(value)}>

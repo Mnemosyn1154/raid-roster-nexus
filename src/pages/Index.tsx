@@ -115,9 +115,9 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 to-slate-900 flex flex-col items-center py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 to-slate-900 flex flex-col items-center py-4 md:py-8 px-2 md:px-4">
       <div className="w-full max-w-[720px]">
-        <div className="rounded-lg border border-white/20 bg-slate-900/50 p-6">
+        <div className="rounded-lg border border-white/20 bg-slate-900/50 p-4 md:p-6">
           <h1 className="text-3xl font-semibold text-white mb-6">
             길드 레이드 현황
           </h1>
