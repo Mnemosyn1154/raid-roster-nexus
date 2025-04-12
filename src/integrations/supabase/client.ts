@@ -2,10 +2,21 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = "https://zvihamxakxbdnaihfpuu.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp2aWhhbXhha3hiZG5haWhmcHV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQzMzEwNTksImV4cCI6MjA1OTkwNzA1OX0.6prETtTsVw0Y8M3dKEu4MgRLNJYPMY79YVtpjx3BxN8";
+// Supabase API URL과 anon key를 올바르게 설정
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Import the supabase client like this:
-// import { supabase } from "@/integrations/supabase/client";
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Missing Supabase environment variables');
+}
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+export const supabase = createClient<Database>(
+  supabaseUrl as string,
+  supabaseAnonKey as string,
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true
+    }
+  }
+);

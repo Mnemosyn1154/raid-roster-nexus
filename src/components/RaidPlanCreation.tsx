@@ -3,6 +3,7 @@ import { RaidPlan } from '@/types';
 import { Calendar } from "@/components/ui/calendar";
 import { ko } from "date-fns/locale";
 import { format } from "date-fns";
+import { supabase } from '@/integrations/supabase/client';
 import {
   Select,
   SelectContent,
@@ -53,45 +54,112 @@ const RaidPlanCreation: React.FC<RaidPlanCreationProps> = ({
     return `${hour}:${minute}`;
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedDate && time && dungeonName && raidLeader) {
       const formattedDate = format(selectedDate, 'M월 d일');
       
-      if (isEditing && currentRaidPlan && onUpdateRaidPlan) {
-        onUpdateRaidPlan({
-          ...currentRaidPlan,
-          date: formattedDate,
-          time,
-          dungeonName,
-          minimumParticipants,
-          minimumItemLevel,
-          raidLeader,
-          details
-        });
-      } else {
-        onCreateRaidPlan(
-          formattedDate, 
-          time, 
-          dungeonName, 
-          minimumParticipants, 
-          minimumItemLevel, 
-          raidLeader,
-          details
-        );
+      try {
+        if (isEditing && currentRaidPlan && onUpdateRaidPlan) {
+          console.log('Updating raid plan:', {
+            date: formattedDate,
+            time,
+            dungeon_name: dungeonName,
+            minimum_participants: minimumParticipants,
+            minimum_item_level: minimumItemLevel,
+            raid_leader: raidLeader,
+            details
+          });
+
+          const { error: updateError } = await supabase
+            .from('raid_plans')
+            .update({
+              date: formattedDate,
+              time,
+              dungeon_name: dungeonName,
+              minimum_participants: minimumParticipants,
+              minimum_item_level: minimumItemLevel,
+              raid_leader: raidLeader,
+              details,
+              participants: []
+            })
+            .eq('id', currentRaidPlan.id);
+
+          if (updateError) {
+            console.error('Supabase update error:', updateError);
+            throw updateError;
+          }
+          onUpdateRaidPlan({
+            ...currentRaidPlan,
+            date: formattedDate,
+            time,
+            dungeonName,
+            minimumParticipants,
+            minimumItemLevel,
+            raidLeader,
+            details
+          });
+        } else {
+          console.log('Creating new raid plan:', {
+            date: formattedDate,
+            time,
+            dungeon_name: dungeonName,
+            minimum_participants: minimumParticipants,
+            minimum_item_level: minimumItemLevel,
+            raid_leader: raidLeader,
+            details
+          });
+
+          const { data: newRaidPlan, error: insertError } = await supabase
+            .from('raid_plans')
+            .insert({
+              date: formattedDate,
+              time,
+              dungeon_name: dungeonName,
+              minimum_participants: minimumParticipants,
+              minimum_item_level: minimumItemLevel,
+              raid_leader: raidLeader,
+              details,
+              participants: []
+            })
+            .select()
+            .single();
+
+          if (insertError) {
+            console.error('Supabase insert error:', insertError);
+            throw insertError;
+          }
+          
+          console.log('New raid plan created:', newRaidPlan);
+          
+          if (newRaidPlan) {
+            onCreateRaidPlan(
+              formattedDate, 
+              time, 
+              dungeonName, 
+              minimumParticipants, 
+              minimumItemLevel, 
+              raidLeader,
+              details
+            );
+          }
+        }
+
+        setIsFormOpen(false);
+        setIsEditing(false);
+        
+        // Reset form
+        setSelectedDate(undefined);
+        setTime('');
+        setDungeonName('');
+        setMinimumParticipants(10);
+        setMinimumItemLevel(600);
+        setRaidLeader('');
+        setDetails('');
+      } catch (error) {
+        console.error('Error saving raid plan:', error);
+        alert('레이드 일정 저장 중 오류가 발생했습니다.');
       }
-      
-      setIsFormOpen(false);
-      setIsEditing(false);
-      
-      // Reset form
-      setSelectedDate(undefined);
-      setTime('');
-      setDungeonName('');
-      setMinimumParticipants(10);
-      setMinimumItemLevel(600);
-      setRaidLeader('');
-      setDetails('');
     }
   };
 

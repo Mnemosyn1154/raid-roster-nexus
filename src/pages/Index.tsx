@@ -1,18 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { RaidPlan, Participant, Role, WoWClass, Specialization } from '@/types';
-import { mockRaidPlan } from '@/data/mockData';
 import RaidPlanCreation from '@/components/RaidPlanCreation';
 import RaidPlanDisplay from '@/components/RaidPlanDisplay';
 import ParticipantList from '@/components/ParticipantList';
 import SignUpForm from '@/components/SignUpForm';
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from '@/integrations/supabase/client';
 
 const Index = () => {
-  const [raidPlan, setRaidPlan] = useState<RaidPlan | null>(mockRaidPlan);
+  const [raidPlan, setRaidPlan] = useState<RaidPlan | null>(null);
   const { toast } = useToast();
-  
-  const handleCreateRaidPlan = (
+
+  // 레이드 일정 불러오기
+  useEffect(() => {
+    fetchRaidPlan();
+  }, []);
+
+  const fetchRaidPlan = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('raid_plans')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        // Supabase의 스네이크 케이스를 캐멀 케이스로 변환
+        const formattedRaidPlan = {
+          id: data.id,
+          date: data.date,
+          time: data.time,
+          dungeonName: data.dungeon_name,
+          minimumParticipants: data.minimum_participants,
+          minimumItemLevel: data.minimum_item_level,
+          raidLeader: data.raid_leader,
+          details: data.details,
+          participants: data.participants || []
+        };
+        setRaidPlan(formattedRaidPlan);
+      }
+    } catch (error) {
+      console.error('Error fetching raid plan:', error);
+      toast({
+        title: "오류",
+        description: "레이드 일정을 불러오는데 실패했습니다.",
+      });
+    }
+  };
+
+  const handleCreateRaidPlan = async (
     date: string,
     time: string,
     dungeonName: string,
@@ -48,7 +88,7 @@ const Index = () => {
     });
   };
 
-  const handleSignUp = (
+  const handleSignUp = async (
     characterName: string,
     role: Role,
     wowClass: WoWClass,
@@ -85,33 +125,69 @@ const Index = () => {
       spec,
       itemLevel
     };
-    
-    setRaidPlan({
-      ...raidPlan,
-      participants: [...raidPlan.participants, newParticipant]
-    });
-    
-    toast({
-      title: "참가 신청 완료",
-      description: `${characterName}(${spec} ${wowClass})님이 레이드에 참가했습니다.`,
-    });
+
+    try {
+      const updatedParticipants = [...raidPlan.participants, newParticipant];
+      
+      const { error } = await supabase
+        .from('raid_plans')
+        .update({ participants: updatedParticipants })
+        .eq('id', raidPlan.id);
+
+      if (error) throw error;
+
+      setRaidPlan({
+        ...raidPlan,
+        participants: updatedParticipants
+      });
+
+      toast({
+        title: "참가 신청 완료",
+        description: `${characterName}(${spec} ${wowClass})님이 레이드에 참가했습니다.`,
+      });
+    } catch (error) {
+      console.error('Error signing up:', error);
+      toast({
+        title: "참가 신청 실패",
+        description: "레이드 신청 중 오류가 발생했습니다.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleRemoveParticipant = (id: string) => {
+  const handleRemoveParticipant = async (id: string) => {
     if (!raidPlan) return;
-    
+
     const participant = raidPlan.participants.find(p => p.id === id);
     if (!participant) return;
-    
-    setRaidPlan({
-      ...raidPlan,
-      participants: raidPlan.participants.filter(p => p.id !== id)
-    });
-    
-    toast({
-      title: "참가자 제외",
-      description: `${participant.characterName}님이 레이드에서 제외되었습니다.`,
-    });
+
+    try {
+      const updatedParticipants = raidPlan.participants.filter(p => p.id !== id);
+      
+      const { error } = await supabase
+        .from('raid_plans')
+        .update({ participants: updatedParticipants })
+        .eq('id', raidPlan.id);
+
+      if (error) throw error;
+
+      setRaidPlan({
+        ...raidPlan,
+        participants: updatedParticipants
+      });
+
+      toast({
+        title: "참가자 제외",
+        description: `${participant.characterName}님이 레이드에서 제외되었습니다.`,
+      });
+    } catch (error) {
+      console.error('Error removing participant:', error);
+      toast({
+        title: "오류",
+        description: "참가자 제외 중 오류가 발생했습니다.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (

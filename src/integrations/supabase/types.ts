@@ -6,10 +6,47 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type Database = {
+export interface Database {
   public: {
     Tables: {
-      [_ in never]: never
+      raid_plans: {
+        Row: {
+          id: string
+          created_at: string
+          date: string
+          time: string
+          dungeon_name: string
+          minimum_participants: number
+          minimum_item_level: number
+          raid_leader: string
+          details: string | null
+          participants: Json[] | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          date: string
+          time: string
+          dungeon_name: string
+          minimum_participants: number
+          minimum_item_level: number
+          raid_leader: string
+          details?: string | null
+          participants?: Json[] | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          date?: string
+          time?: string
+          dungeon_name?: string
+          minimum_participants?: number
+          minimum_item_level?: number
+          raid_leader?: string
+          details?: string | null
+          participants?: Json[] | null
+        }
+      }
     }
     Views: {
       [_ in never]: never
