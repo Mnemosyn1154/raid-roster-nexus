@@ -20,7 +20,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSignUp }) => {
   const [selectedClass, setSelectedClass] = useState<WoWClass>('전사');
   const [selectedSpec, setSelectedSpec] = useState<Specialization>('무기');
   const [role, setRole] = useState<Role>('딜러');
-  const [itemLevel, setItemLevel] = useState<number>(0);
+  const [itemLevel, setItemLevel] = useState<number>(600);
 
   // 직업별 가능한 특성 목록
   const specs = {
@@ -34,7 +34,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSignUp }) => {
     '성기사': ['신성', '보호', '징벌'],
     '사제': ['수양', '신성', '암흑'],
     '도적': ['암살', '무법', '잠행'],
-    '주술사': ['원소', '고양', '회복'],
+    '주술사': ['원소', '고양', '복원'],
     '흑마법사': ['고통', '악마', '파괴'],
     '전사': ['무기', '분노', '방어']
   } as const;
@@ -42,7 +42,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSignUp }) => {
   // 직업과 특성에 따른 역할 매핑
   const getRole = (wowClass: WoWClass, spec: string): Role => {
     const tankSpecs = ['혈기', '복수', '수호', '양조', '보호', '방어'];
-    const healerSpecs = ['회복', '보존', '운무', '신성', '수양'];
+    const healerSpecs = ['복원', '보존', '운무', '신성', '수양', '회복'];
     
     if (tankSpecs.includes(spec)) return '탱커';
     if (healerSpecs.includes(spec)) return '힐러';
@@ -69,7 +69,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSignUp }) => {
       setSelectedClass('전사');
       setSelectedSpec('무기');
       setRole('딜러');
-      setItemLevel(0);
+      setItemLevel(600);
     }
   };
 
@@ -108,7 +108,9 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSignUp }) => {
             <label className="block text-white/80 mb-1 text-sm">직업</label>
             <Select value={selectedClass} onValueChange={(value: WoWClass) => setSelectedClass(value)}>
               <SelectTrigger className="w-full bg-slate-800/50 border-white/20 text-white">
-                <SelectValue placeholder="직업 선택" />
+                <SelectValue placeholder="직업 선택">
+                  <span className={classColors[selectedClass]}>{selectedClass}</span>
+                </SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-white/20">
                 <SelectGroup>
@@ -175,7 +177,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSignUp }) => {
               onChange={(e) => setItemLevel(Math.max(0, parseInt(e.target.value) || 0))}
               min="0"
               className="w-full rounded border border-white/20 bg-slate-800/50 px-3 py-2 text-white placeholder:text-white/50 focus:border-white/40 focus:outline-none"
-              placeholder="447"
+              placeholder="600"
               required
             />
           </div>

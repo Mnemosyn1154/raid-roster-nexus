@@ -18,7 +18,8 @@ const Index = () => {
     dungeonName: string,
     minimumParticipants: number,
     minimumItemLevel: number,
-    raidLeader: string
+    raidLeader: string,
+    details?: string
   ) => {
     const newRaidPlan: RaidPlan = {
       id: uuidv4(),
@@ -28,6 +29,7 @@ const Index = () => {
       minimumParticipants,
       minimumItemLevel,
       raidLeader,
+      details,
       participants: []
     };
     
@@ -35,6 +37,14 @@ const Index = () => {
     toast({
       title: "레이드 일정 생성",
       description: `${dungeonName} 레이드 일정이 생성되었습니다.`,
+    });
+  };
+
+  const handleUpdateRaidPlan = (updatedRaidPlan: RaidPlan) => {
+    setRaidPlan(updatedRaidPlan);
+    toast({
+      title: "레이드 일정 수정",
+      description: `${updatedRaidPlan.dungeonName} 레이드 일정이 수정되었습니다.`,
     });
   };
 
@@ -127,7 +137,11 @@ const Index = () => {
             </div>
           )}
           
-          <RaidPlanCreation onCreateRaidPlan={handleCreateRaidPlan} />
+          <RaidPlanCreation 
+            onCreateRaidPlan={handleCreateRaidPlan} 
+            onUpdateRaidPlan={handleUpdateRaidPlan}
+            currentRaidPlan={raidPlan}
+          />
         </div>
       </div>
     </div>

@@ -35,6 +35,12 @@ const RaidPlanDisplay: React.FC<RaidPlanDisplayProps> = ({ raidPlan }) => {
           <p className="font-semibold text-white text-lg text-left">{raidPlan.minimumItemLevel}</p>
         </div>
       </div>
+      {raidPlan.details && (
+        <div className="mt-4 p-3 bg-slate-800/50 rounded border border-white/20">
+          <p className="text-white/80 mb-2 text-base font-medium text-left">세부사항</p>
+          <p className="font-semibold text-white text-lg text-left whitespace-pre-line">{raidPlan.details}</p>
+        </div>
+      )}
     </div>
   );
 };

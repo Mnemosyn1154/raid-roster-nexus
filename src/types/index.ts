@@ -26,7 +26,7 @@ export type ClassSpec = {
   '성기사': ['신성', '보호', '징벌'];
   '사제': ['수양', '신성', '암흑'];
   '도적': ['암살', '무법', '잠행'];
-  '주술사': ['원소', '고양', '회복'];
+  '주술사': ['원소', '고양', '복원'];
   '흑마법사': ['고통', '악마', '파괴'];
   '전사': ['무기', '분노', '방어'];
 };
@@ -50,6 +50,7 @@ export interface RaidPlan {
   minimumParticipants: number;
   minimumItemLevel: number;
   raidLeader: string;
+  details?: string;
   participants: Participant[];
 }
 

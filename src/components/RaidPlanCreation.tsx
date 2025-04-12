@@ -23,19 +23,28 @@ interface RaidPlanCreationProps {
     dungeonName: string,
     minimumParticipants: number,
     minimumItemLevel: number,
-    raidLeader: string
+    raidLeader: string,
+    details: string
   ) => void;
+  onUpdateRaidPlan?: (raidPlan: RaidPlan) => void;
+  currentRaidPlan?: RaidPlan;
 }
 
-const RaidPlanCreation: React.FC<RaidPlanCreationProps> = ({ onCreateRaidPlan }) => {
+const RaidPlanCreation: React.FC<RaidPlanCreationProps> = ({ 
+  onCreateRaidPlan, 
+  onUpdateRaidPlan,
+  currentRaidPlan 
+}) => {
   const { isAdmin } = useAdmin();
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState('');
   const [dungeonName, setDungeonName] = useState('');
   const [minimumParticipants, setMinimumParticipants] = useState(10);
   const [minimumItemLevel, setMinimumItemLevel] = useState(600);
   const [raidLeader, setRaidLeader] = useState('');
+  const [details, setDetails] = useState('');
 
   // 30분 단위로 시간 옵션 생성 (18:00부터)
   const timeOptions = Array.from({ length: 13 }, (_, i) => {
@@ -48,8 +57,33 @@ const RaidPlanCreation: React.FC<RaidPlanCreationProps> = ({ onCreateRaidPlan })
     e.preventDefault();
     if (selectedDate && time && dungeonName && raidLeader) {
       const formattedDate = format(selectedDate, 'M월 d일');
-      onCreateRaidPlan(formattedDate, time, dungeonName, minimumParticipants, minimumItemLevel, raidLeader);
+      
+      if (isEditing && currentRaidPlan && onUpdateRaidPlan) {
+        onUpdateRaidPlan({
+          ...currentRaidPlan,
+          date: formattedDate,
+          time,
+          dungeonName,
+          minimumParticipants,
+          minimumItemLevel,
+          raidLeader,
+          details
+        });
+      } else {
+        onCreateRaidPlan(
+          formattedDate, 
+          time, 
+          dungeonName, 
+          minimumParticipants, 
+          minimumItemLevel, 
+          raidLeader,
+          details
+        );
+      }
+      
       setIsFormOpen(false);
+      setIsEditing(false);
+      
       // Reset form
       setSelectedDate(undefined);
       setTime('');
@@ -57,6 +91,31 @@ const RaidPlanCreation: React.FC<RaidPlanCreationProps> = ({ onCreateRaidPlan })
       setMinimumParticipants(10);
       setMinimumItemLevel(600);
       setRaidLeader('');
+      setDetails('');
+    }
+  };
+
+  const handleEdit = () => {
+    if (currentRaidPlan) {
+      setIsEditing(true);
+      setIsFormOpen(true);
+      
+      // Parse the date string (e.g., "3월 25일") to Date object
+      const dateRegex = /(\d+)월\s*(\d+)일/;
+      const matches = currentRaidPlan.date.match(dateRegex);
+      if (matches) {
+        const month = parseInt(matches[1]) - 1; // 0-based month
+        const day = parseInt(matches[2]);
+        const currentYear = new Date().getFullYear();
+        setSelectedDate(new Date(currentYear, month, day));
+      }
+      
+      setTime(currentRaidPlan.time);
+      setDungeonName(currentRaidPlan.dungeonName);
+      setMinimumParticipants(currentRaidPlan.minimumParticipants);
+      setMinimumItemLevel(currentRaidPlan.minimumItemLevel);
+      setRaidLeader(currentRaidPlan.raidLeader);
+      setDetails(currentRaidPlan.details || '');
     }
   };
 
@@ -64,15 +123,30 @@ const RaidPlanCreation: React.FC<RaidPlanCreationProps> = ({ onCreateRaidPlan })
     <div className="mt-4">
       {isAdmin ? (
         !isFormOpen ? (
-          <button 
-            onClick={() => setIsFormOpen(true)} 
-            className="w-full rounded bg-purple-600 py-3 text-white transition-colors hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-          >
-            새 레이드 생성
-          </button>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => {
+                setIsEditing(false);
+                setIsFormOpen(true);
+              }} 
+              className="flex-1 rounded bg-purple-600 py-3 text-white transition-colors hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+            >
+              새 레이드 생성
+            </button>
+            {currentRaidPlan && (
+              <button 
+                onClick={handleEdit}
+                className="rounded bg-blue-600 py-3 px-16 text-white text-lg transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                수정
+              </button>
+            )}
+          </div>
         ) : (
           <div className="rounded-lg border border-white/20 bg-slate-900/50 p-4">
-            <h2 className="text-xl font-semibold text-white mb-3">새 레이드 일정 생성</h2>
+            <h2 className="text-xl font-semibold text-white mb-3">
+              {isEditing ? '레이드 일정 수정' : '새 레이드 일정 생성'}
+            </h2>
             <form onSubmit={handleSubmit} className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -122,7 +196,7 @@ const RaidPlanCreation: React.FC<RaidPlanCreationProps> = ({ onCreateRaidPlan })
                 </div>
               </div>
               <div>
-                <label className="block text-white/80 mb-1 text-sm">던전 이름</label>
+                <label className="block text-white/80 mb-1 text-sm">던전</label>
                 <input
                   type="text"
                   value={dungeonName}
@@ -167,19 +241,35 @@ const RaidPlanCreation: React.FC<RaidPlanCreationProps> = ({ onCreateRaidPlan })
                   required
                 />
               </div>
+              <div>
+                <label className="block text-white/80 mb-1 text-sm">세부사항</label>
+                <textarea
+                  value={details}
+                  onChange={(e) => setDetails(e.target.value)}
+                  placeholder="예) 2탐, 길드원만 1천 올분 팟"
+                  className="w-full rounded border border-white/20 bg-slate-800/50 px-3 py-2 text-white placeholder:text-white/50 focus:border-white/40 focus:outline-none min-h-[80px]"
+                />
+              </div>
               <div className="grid grid-cols-2 gap-3 pt-2">
                 <button 
                   type="button" 
-                  onClick={() => setIsFormOpen(false)} 
+                  onClick={() => {
+                    setIsFormOpen(false);
+                    setIsEditing(false);
+                  }} 
                   className="rounded border border-white/20 bg-slate-800/50 py-2 px-4 text-white transition-colors hover:bg-slate-700/50 focus:outline-none focus:ring-2 focus:ring-white/20"
                 >
                   취소
                 </button>
                 <button 
                   type="submit" 
-                  className="rounded bg-purple-600 py-2 px-4 text-white transition-colors hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                  className={`rounded py-2 px-4 text-white text-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                    isEditing 
+                      ? "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500" 
+                      : "bg-purple-600 hover:bg-purple-700 focus:ring-purple-500"
+                  }`}
                 >
-                  생성하기
+                  {isEditing ? '수정하기' : '생성하기'}
                 </button>
               </div>
             </form>

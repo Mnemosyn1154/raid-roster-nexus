@@ -54,7 +54,7 @@ export const specIcons: SpecIconMapping = {
   '주술사': {
     '원소': { name: 'Elemental', path: '/spec-icons/shaman/elemental.png' },
     '고양': { name: 'Enhancement', path: '/spec-icons/shaman/enhancement.png' },
-    '회복': { name: 'Restoration', path: '/spec-icons/shaman/restoration.png' }
+    '복원': { name: 'Restoration', path: '/spec-icons/shaman/restoration.png' }
   },
   '흑마법사': {
     '고통': { name: 'Affliction', path: '/spec-icons/warlock/affliction.png' },

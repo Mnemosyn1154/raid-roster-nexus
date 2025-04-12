@@ -13,7 +13,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   
   const verifyPassword = (password: string) => {
     // 실제 구현에서는 더 안전한 방식으로 비밀번호를 검증해야 합니다
-    const isValid = password === "admin1234";
+    const isValid = password === "impreza1234!";
     setIsAdmin(isValid);
     return isValid;
   };
