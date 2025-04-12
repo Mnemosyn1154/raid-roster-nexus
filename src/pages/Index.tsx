@@ -195,7 +195,7 @@ const Index = () => {
       <div className="w-full max-w-[720px]">
         <div className="rounded-lg border border-white/20 bg-slate-900/50 p-4 md:p-6">
           <h1 className="text-3xl font-semibold text-white mb-6">
-            길드 레이드 현황
+            Impreza 길드 레이드 일정
           </h1>
           
           {raidPlan ? (

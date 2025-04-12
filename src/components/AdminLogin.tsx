@@ -27,29 +27,33 @@ export function AdminLogin() {
   };
 
   return (
-    <div className="fixed top-4 right-4 z-50">
-      {!isAdmin ? (
-        <form onSubmit={handleSubmit} className="flex gap-2">
-          <Input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="관리자 비밀번호"
-            className="w-40 bg-slate-800/50 border-white/20"
-          />
-          <Button type="submit" variant="outline">
-            로그인
-          </Button>
-        </form>
-      ) : (
-        <Button 
-          variant="outline" 
-          onClick={() => setIsAdmin(false)}
-          className="text-red-400 hover:text-red-300"
-        >
-          로그아웃
-        </Button>
-      )}
+    <div className="w-full bg-slate-900 border-b border-white/10">
+      <div className="container mx-auto px-4 py-2">
+        <div className="flex justify-end">
+          {!isAdmin ? (
+            <form onSubmit={handleSubmit} className="flex gap-2">
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="관리자 비밀번호"
+                className="w-40 bg-slate-800/50 border-white/20"
+              />
+              <Button type="submit" variant="outline">
+                로그인
+              </Button>
+            </form>
+          ) : (
+            <Button 
+              variant="outline" 
+              onClick={() => setIsAdmin(false)}
+              className="text-red-400 hover:text-red-300"
+            >
+              로그아웃
+            </Button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

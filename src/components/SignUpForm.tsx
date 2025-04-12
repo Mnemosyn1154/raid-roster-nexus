@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Role, WoWClass, Specialization, ClassSpec } from '../types';
 import { specIcons } from '@/data/specIcons';
+import { useToast } from "@/hooks/use-toast";
 import { 
   Select,
   SelectContent,
@@ -16,6 +17,7 @@ interface SignUpFormProps {
 }
 
 const SignUpForm: React.FC<SignUpFormProps> = ({ onSignUp }) => {
+  const { toast } = useToast();
   const [characterName, setCharacterName] = useState('');
   const [selectedClass, setSelectedClass] = useState<WoWClass>('전사');
   const [selectedSpec, setSelectedSpec] = useState<Specialization>('무기');
@@ -63,6 +65,14 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSignUp }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (itemLevel < 550 || itemLevel > 700) {
+      toast({
+        title: "아이템 레벨 오류",
+        description: "아이템 레벨은 550에서 700 사이여야 합니다.",
+        variant: "destructive"
+      });
+      return;
+    }
     if (characterName.trim() && itemLevel > 0) {
       onSignUp(characterName, role, selectedClass, selectedSpec, itemLevel);
       setCharacterName('');

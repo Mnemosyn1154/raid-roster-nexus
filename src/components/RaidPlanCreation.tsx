@@ -206,7 +206,7 @@ const RaidPlanCreation: React.FC<RaidPlanCreationProps> = ({
                 onClick={handleEdit}
                 className="rounded bg-blue-600 py-3 text-white text-lg transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
-                수정
+                레이드 일정 수정
               </button>
             )}
           </div>
