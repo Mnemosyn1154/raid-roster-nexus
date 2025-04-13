@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { RaidPlan } from '@/types';
 import { Calendar } from "@/components/ui/calendar";
 import { ko } from "date-fns/locale";
-import { format } from "date-fns";
+import { format, isBefore, set } from "date-fns";
 import { supabase } from '@/integrations/supabase/client';
 import {
   Select,
@@ -54,9 +54,26 @@ const RaidPlanCreation: React.FC<RaidPlanCreationProps> = ({
     return `${hour}:${minute}`;
   });
 
+  const validateDateTime = (date: Date, timeStr: string): boolean => {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    const selectedDateTime = set(date, { hours, minutes });
+    const now = new Date();
+    
+    if (isBefore(selectedDateTime, now)) {
+      alert('과거 시간으로 레이드 일정을 생성할 수 없습니다.');
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedDate && time && dungeonName && raidLeader) {
+      // 시간 유효성 검사
+      if (!validateDateTime(selectedDate, time)) {
+        return;
+      }
+
       const formattedDate = format(selectedDate, 'M월 d일');
       
       try {

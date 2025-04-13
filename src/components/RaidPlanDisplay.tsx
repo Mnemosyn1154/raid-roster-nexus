@@ -1,14 +1,43 @@
 import React from 'react';
 import { RaidPlan } from '@/types';
+import { useAdmin } from '@/contexts/AdminContext';
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 interface RaidPlanDisplayProps {
   raidPlan: RaidPlan;
+  onDelete?: (id: string) => void;
 }
 
-const RaidPlanDisplay: React.FC<RaidPlanDisplayProps> = ({ raidPlan }) => {
+const RaidPlanDisplay: React.FC<RaidPlanDisplayProps> = ({ raidPlan, onDelete }) => {
+  const { isAdmin } = useAdmin();
+
   return (
     <div className="rounded-lg border border-white/20 bg-slate-900/50 p-4">
-      <h2 className="text-xl font-semibold text-white mb-3">레이드 일정</h2>
+      <div className="flex justify-between items-center mb-3">
+        <h2 className="text-xl font-semibold text-white">레이드 일정</h2>
+        {isAdmin && onDelete && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm">
+                레이드 삭제
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="bg-slate-900 border-white/20">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-white">레이드 일정을 삭제하시겠습니까?</AlertDialogTitle>
+                <AlertDialogDescription className="text-white/80">
+                  이 작업은 되돌릴 수 없습니다. 레이드 일정과 모든 참가자 정보가 영구적으로 삭제됩니다.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <Button variant="outline" onClick={() => {}}>취소</Button>
+                <Button variant="destructive" onClick={() => onDelete(raidPlan.id)}>삭제</Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="p-3 bg-slate-800/50 rounded border border-white/20">
           <p className="text-white/80 mb-2 text-base font-medium text-left">날짜</p>

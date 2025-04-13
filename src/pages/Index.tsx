@@ -15,6 +15,9 @@ const Index = () => {
   // 레이드 일정 불러오기
   useEffect(() => {
     fetchRaidPlan();
+    // 1분마다 자동 삭제 체크
+    const interval = setInterval(checkAndDeleteExpiredRaid, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchRaidPlan = async () => {
@@ -86,6 +89,53 @@ const Index = () => {
       title: "레이드 일정 수정",
       description: `${updatedRaidPlan.dungeonName} 레이드 일정이 수정되었습니다.`,
     });
+  };
+
+  const handleDeleteRaidPlan = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('raid_plans')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setRaidPlan(null);
+      toast({
+        title: "레이드 삭제",
+        description: "레이드 일정이 삭제되었습니다.",
+      });
+    } catch (error) {
+      console.error('Error deleting raid plan:', error);
+      toast({
+        title: "오류",
+        description: "레이드 일정 삭제 중 오류가 발생했습니다.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const checkAndDeleteExpiredRaid = async () => {
+    if (!raidPlan) return;
+
+    const now = new Date();
+    const [month, day] = raidPlan.date.match(/(\d+)월\s*(\d+)일/)?.slice(1).map(Number) || [];
+    const [hour, minute] = raidPlan.time.split(':').map(Number);
+    
+    if (!month || !day || hour === undefined || minute === undefined) return;
+
+    const raidDate = new Date(now.getFullYear(), month - 1, day, hour, minute);
+    const timeDifference = now.getTime() - raidDate.getTime();
+    const hoursDifference = timeDifference / (1000 * 60 * 60);
+
+    // 레이드 시작 시간으로부터 10시간이 지났다면 자동 삭제
+    if (hoursDifference >= 10) {
+      await handleDeleteRaidPlan(raidPlan.id);
+      toast({
+        title: "레이드 자동 삭제",
+        description: "레이드 시작 시간으로부터 10시간이 지나 자동으로 삭제되었습니다.",
+      });
+    }
   };
 
   const handleSignUp = async (
@@ -195,12 +245,12 @@ const Index = () => {
       <div className="w-full max-w-[720px]">
         <div className="rounded-lg border border-white/20 bg-slate-900/50 p-4 md:p-6">
           <h1 className="text-3xl font-semibold text-white mb-6">
-            Impreza 길드 레이드 일정
+            Impreza 레이드 일정
           </h1>
           
           {raidPlan ? (
             <>
-              <RaidPlanDisplay raidPlan={raidPlan} />
+              <RaidPlanDisplay raidPlan={raidPlan} onDelete={handleDeleteRaidPlan} />
               <ParticipantList 
                 participants={raidPlan.participants} 
                 onRemoveParticipant={handleRemoveParticipant} 
