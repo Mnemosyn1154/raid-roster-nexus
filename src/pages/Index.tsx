@@ -83,11 +83,18 @@ const Index = () => {
     });
   };
 
-  const handleUpdateRaidPlan = (updatedRaidPlan: RaidPlan) => {
-    setRaidPlan(updatedRaidPlan);
+  const handleUpdateRaidPlan = (updatedFields: Omit<RaidPlan, 'id' | 'participants'>) => {
+    setRaidPlan(prevPlan => {
+      if (!prevPlan) return null; // 이전 상태가 없으면 null 반환
+      // 이전 상태의 participants를 유지하면서 나머지 필드만 업데이트
+      return {
+        ...prevPlan,
+        ...updatedFields,
+      };
+    });
     toast({
       title: "레이드 일정 수정",
-      description: `${updatedRaidPlan.dungeonName} 레이드 일정이 수정되었습니다.`,
+      description: `${updatedFields.dungeonName} 레이드 일정이 수정되었습니다.`,
     });
   };
 
