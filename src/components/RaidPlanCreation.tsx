@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { RaidPlan } from '@/types';
 import { Calendar } from "@/components/ui/calendar";
 import { ko } from "date-fns/locale";
-import { format, isBefore, set } from "date-fns";
-import { supabase } from '@/integrations/supabase/client';
+import { format } from "date-fns";
 import {
   Select,
   SelectContent,
@@ -16,6 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAdmin } from '@/contexts/AdminContext';
+import { useRaidPlanForm } from '@/hooks/useRaidPlanForm'; // Import the custom hook
 
 interface RaidPlanCreationProps {
   onCreateRaidPlan: (
@@ -31,196 +31,56 @@ interface RaidPlanCreationProps {
   currentRaidPlan?: RaidPlan;
 }
 
-const RaidPlanCreation: React.FC<RaidPlanCreationProps> = ({ 
-  onCreateRaidPlan, 
+const RaidPlanCreation = ({
+  onCreateRaidPlan,
   onUpdateRaidPlan,
-  currentRaidPlan 
-}) => {
+  currentRaidPlan,
+}: RaidPlanCreationProps) => {
   const { isAdmin } = useAdmin();
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [time, setTime] = useState('');
-  const [dungeonName, setDungeonName] = useState('');
-  const [minimumParticipants, setMinimumParticipants] = useState(10);
-  const [minimumItemLevel, setMinimumItemLevel] = useState(600);
-  const [raidLeader, setRaidLeader] = useState('');
-  const [details, setDetails] = useState('');
 
-  // 30분 단위로 시간 옵션 생성 (18:00부터)
-  const timeOptions = Array.from({ length: 13 }, (_, i) => {
-    const hour = Math.floor(i / 2) + 18;
-    const minute = i % 2 === 0 ? '00' : '30';
-    return `${hour}:${minute}`;
+  const {
+    isEditing,
+    selectedDate,
+    setSelectedDate,
+    time,
+    setTime,
+    dungeonName,
+    setDungeonName,
+    minimumParticipants,
+    setMinimumParticipants,
+    minimumItemLevel,
+    setMinimumItemLevel,
+    raidLeader,
+    setRaidLeader,
+    details,
+    setDetails,
+    timeOptions,
+    handleSubmit,
+    handleEditClick,
+    handleCreateClick,
+    handleCancelClick,
+  } = useRaidPlanForm({
+    currentRaidPlan,
+    onCreateRaidPlan,
+    onUpdateRaidPlan,
+    onFormToggle: setIsFormOpen, // Pass the state setter to the hook
   });
-
-  const validateDateTime = (date: Date, timeStr: string): boolean => {
-    const [hours, minutes] = timeStr.split(':').map(Number);
-    const selectedDateTime = set(date, { hours, minutes });
-    const now = new Date();
-    
-    if (isBefore(selectedDateTime, now)) {
-      alert('과거 시간으로 레이드 일정을 생성할 수 없습니다.');
-      return false;
-    }
-    return true;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (selectedDate && time && dungeonName && raidLeader) {
-      // 시간 유효성 검사
-      if (!validateDateTime(selectedDate, time)) {
-        return;
-      }
-
-      const formattedDate = format(selectedDate, 'M월 d일');
-      
-      try {
-        if (isEditing && currentRaidPlan && onUpdateRaidPlan) {
-          console.log('Updating raid plan:', {
-            date: formattedDate,
-            time,
-            dungeon_name: dungeonName,
-            minimum_participants: minimumParticipants,
-            minimum_item_level: minimumItemLevel,
-            raid_leader: raidLeader,
-            details
-          });
-
-          const { error: updateError } = await supabase
-            .from('raid_plans')
-            .update({
-              date: formattedDate,
-              time,
-              dungeon_name: dungeonName,
-              minimum_participants: minimumParticipants,
-              minimum_item_level: minimumItemLevel,
-              raid_leader: raidLeader,
-              details,
-              participants: []
-            })
-            .eq('id', currentRaidPlan.id);
-
-          if (updateError) {
-            console.error('Supabase update error:', updateError);
-            throw updateError;
-          }
-          onUpdateRaidPlan({
-            ...currentRaidPlan,
-            date: formattedDate,
-            time,
-            dungeonName,
-            minimumParticipants,
-            minimumItemLevel,
-            raidLeader,
-            details
-          });
-        } else {
-          console.log('Creating new raid plan:', {
-            date: formattedDate,
-            time,
-            dungeon_name: dungeonName,
-            minimum_participants: minimumParticipants,
-            minimum_item_level: minimumItemLevel,
-            raid_leader: raidLeader,
-            details
-          });
-
-          const { data: newRaidPlan, error: insertError } = await supabase
-            .from('raid_plans')
-            .insert({
-              date: formattedDate,
-              time,
-              dungeon_name: dungeonName,
-              minimum_participants: minimumParticipants,
-              minimum_item_level: minimumItemLevel,
-              raid_leader: raidLeader,
-              details,
-              participants: []
-            })
-            .select()
-            .single();
-
-          if (insertError) {
-            console.error('Supabase insert error:', insertError);
-            throw insertError;
-          }
-          
-          console.log('New raid plan created:', newRaidPlan);
-          
-          if (newRaidPlan) {
-            onCreateRaidPlan(
-              formattedDate, 
-              time, 
-              dungeonName, 
-              minimumParticipants, 
-              minimumItemLevel, 
-              raidLeader,
-              details
-            );
-          }
-        }
-
-        setIsFormOpen(false);
-        setIsEditing(false);
-        
-        // Reset form
-        setSelectedDate(undefined);
-        setTime('');
-        setDungeonName('');
-        setMinimumParticipants(10);
-        setMinimumItemLevel(600);
-        setRaidLeader('');
-        setDetails('');
-      } catch (error) {
-        console.error('Error saving raid plan:', error);
-        alert('레이드 일정 저장 중 오류가 발생했습니다.');
-      }
-    }
-  };
-
-  const handleEdit = () => {
-    if (currentRaidPlan) {
-      setIsEditing(true);
-      setIsFormOpen(true);
-      
-      // Parse the date string (e.g., "3월 25일") to Date object
-      const dateRegex = /(\d+)월\s*(\d+)일/;
-      const matches = currentRaidPlan.date.match(dateRegex);
-      if (matches) {
-        const month = parseInt(matches[1]) - 1; // 0-based month
-        const day = parseInt(matches[2]);
-        const currentYear = new Date().getFullYear();
-        setSelectedDate(new Date(currentYear, month, day));
-      }
-      
-      setTime(currentRaidPlan.time);
-      setDungeonName(currentRaidPlan.dungeonName);
-      setMinimumParticipants(currentRaidPlan.minimumParticipants);
-      setMinimumItemLevel(currentRaidPlan.minimumItemLevel);
-      setRaidLeader(currentRaidPlan.raidLeader);
-      setDetails(currentRaidPlan.details || '');
-    }
-  };
 
   return (
     <div className="mt-4">
       {isAdmin ? (
         !isFormOpen ? (
           <div className="grid grid-cols-2 gap-3">
-            <button 
-              onClick={() => {
-                setIsEditing(false);
-                setIsFormOpen(true);
-              }} 
+            <button
+              onClick={handleCreateClick} // Use hook handler
               className="rounded bg-purple-600 py-3 text-white text-lg transition-colors hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
             >
               새 레이드 생성
             </button>
             {currentRaidPlan && (
-              <button 
-                onClick={handleEdit}
+              <button
+                onClick={handleEditClick} // Use hook handler
                 className="rounded bg-blue-600 py-3 text-white text-lg transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
                 레이드 일정 수정
@@ -233,6 +93,7 @@ const RaidPlanCreation: React.FC<RaidPlanCreationProps> = ({
               {isEditing ? '레이드 일정 수정' : '새 레이드 일정 생성'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-3">
+              {/* Form fields remain largely the same, using state and setters from the hook */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-white/80 mb-1 text-sm">날짜</label>
@@ -297,8 +158,8 @@ const RaidPlanCreation: React.FC<RaidPlanCreationProps> = ({
                   <input
                     type="number"
                     value={minimumParticipants}
-                    onChange={(e) => setMinimumParticipants(parseInt(e.target.value))}
-                    min={5}
+                    onChange={(e) => setMinimumParticipants(parseInt(e.target.value) || 0)} // Ensure number
+                    min={1} // Min participants should be at least 1
                     className="w-full rounded border border-white/20 bg-slate-800/50 px-3 py-2 text-white placeholder:text-white/50 focus:border-white/40 focus:outline-none"
                     required
                   />
@@ -308,7 +169,7 @@ const RaidPlanCreation: React.FC<RaidPlanCreationProps> = ({
                   <input
                     type="number"
                     value={minimumItemLevel}
-                    onChange={(e) => setMinimumItemLevel(parseInt(e.target.value))}
+                    onChange={(e) => setMinimumItemLevel(parseInt(e.target.value) || 0)} // Ensure number
                     min={0}
                     className="w-full rounded border border-white/20 bg-slate-800/50 px-3 py-2 text-white placeholder:text-white/50 focus:border-white/40 focus:outline-none"
                     required
@@ -336,21 +197,18 @@ const RaidPlanCreation: React.FC<RaidPlanCreationProps> = ({
                 />
               </div>
               <div className="grid grid-cols-2 gap-3 pt-2">
-                <button 
-                  type="button" 
-                  onClick={() => {
-                    setIsFormOpen(false);
-                    setIsEditing(false);
-                  }} 
+                <button
+                  type="button"
+                  onClick={handleCancelClick} // Use hook handler
                   className="rounded border border-white/20 bg-slate-800/50 py-2 px-4 text-white transition-colors hover:bg-slate-700/50 focus:outline-none focus:ring-2 focus:ring-white/20"
                 >
                   취소
                 </button>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className={`rounded py-2 px-4 text-white text-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                    isEditing 
-                      ? "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500" 
+                    isEditing
+                      ? "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
                       : "bg-purple-600 hover:bg-purple-700 focus:ring-purple-500"
                   }`}
                 >
